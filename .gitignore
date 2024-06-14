@@ -1,0 +1,5 @@
+.vscode
+build
+wifiData.txt
+sdkconfig
+sdkconfig.old
