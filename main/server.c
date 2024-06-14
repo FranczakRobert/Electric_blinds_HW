@@ -46,11 +46,11 @@ esp_err_t post_handler(httpd_req_t *req)
     if (cJSON_IsNumber(value)) {
         printf("Received value: %d\n", value->valueint);
         if(value->valueint == 1) {
-            turn_led_ON();
+            turn_WIFI_led_ON();
         }
         if (value->valueint == 0)
         {
-            turn_led_OFF();
+            turn_WIFI_led_OFF();
         }
         
     } else {

@@ -1,5 +1,5 @@
 .vscode
 build
-wifiData.txt
+wifiData.h
 sdkconfig
 sdkconfig.old

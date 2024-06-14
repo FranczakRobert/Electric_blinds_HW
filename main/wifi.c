@@ -8,27 +8,15 @@
 #include "nvs_flash.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
-#include <cstring.h>
 
 #include "wifi.h"
 #include "led.h"
+#include "wifiData.h"
 
 #define EXAMPLE_ESP_MAXIMUM_RETRY  3
 
 static int s_retry_num = 0;
 static const char *TAG = "WIFI";
-struct Wifi_Data wifi_Data;
-
-static void read_wifi_data(struct Wifi_Data* wifi_data) {
-    FILE *in_file  = fopen("wifiData.txt", "r");
-    char line_buffer[50];
-
-    fscanf(in_file,"%s",line_buffer);
-    strcpy(wifi_data->name,line_buffer);
-
-    fscanf(in_file,"%s",line_buffer);
-    strcpy(wifi_data->pssswd,line_buffer);
-}
 
 static void event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id,void *event_data){
     if(event_id == WIFI_EVENT_STA_START){
@@ -84,18 +72,17 @@ void wifi_init_sta(void)
                                                         &event_handler,
                                                         NULL));
 
-    read_wifi_data(&wifi_Data);
-
-    printf("Name : %s \n",wifi_Data.name);
-    printf("Psswd: %s \n",wifi_Data.pssswd);
 
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = wifi_Data.name,
-            .password = wifi_Data.pssswd,
-         .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+            .ssid = NAME,
+            .password = PSSWD,
+            .threshold.authmode = WIFI_AUTH_WPA2_PSK
         },
-    };
+    };                                                   
+
+    printf("Name : %s \n",NAME);
+    printf("Psswd: %s \n",PSSWD);
 
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start());
