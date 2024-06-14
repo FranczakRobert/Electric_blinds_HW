@@ -91,8 +91,8 @@ void wifi_init_sta(void)
 
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = data[0],
-            .password = data[1],
+            .ssid = wifi_Data.name,
+            .password = wifi_Data.pssswd,
          .threshold.authmode = WIFI_AUTH_WPA2_PSK,
         },
     };
