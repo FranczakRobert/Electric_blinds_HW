@@ -42,22 +42,32 @@ esp_err_t post_handler(httpd_req_t *req)
         return ESP_FAIL;
     }
 
+    cJSON *where = cJSON_GetObjectItem(json, "where");
     cJSON *value = cJSON_GetObjectItem(json, "value");
-    if (cJSON_IsNumber(value)) {
-        printf("Received value: %d\n", value->valueint);
-        if(value->valueint == 1) {
-            turn_WIFI_led_ON();
+
+    if(cJSON_IsString(where) && (where->valuestring != NULL)) {
+
+        if(strcmp(where->valuestring, "LED") == 0) {
+            if (cJSON_IsNumber(value)) {
+                printf("Received value: %d\n", value->valueint);
+                printf("Received where: %s\n", where->valuestring);
+                if(value->valueint == 1) {
+                    turn_WIFI_led_ON();
+                }
+                if (value->valueint == 0)
+                {
+                    turn_WIFI_led_OFF();
+                }
+                
+            } else {
+                httpd_resp_send_500(req);
+                cJSON_Delete(json);
+                return ESP_FAIL;
+            }
         }
-        if (value->valueint == 0)
-        {
-            turn_WIFI_led_OFF();
-        }
-        
-    } else {
-        httpd_resp_send_500(req);
-        cJSON_Delete(json);
-        return ESP_FAIL;
     }
+
+    
 
     cJSON_Delete(json);
     
