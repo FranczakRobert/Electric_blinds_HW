@@ -7,6 +7,7 @@
 #include "nvs_flash.h"
 #include "math.h"
 #include "led.h"
+#include "shutters_Data.h"
 
 #include "server.h"
 
@@ -22,6 +23,7 @@ static esp_err_t hello_get_handler(httpd_req_t *req) {
 
 esp_err_t post_handler(httpd_req_t *req)
 {
+    prinData();
     char content[100];
     size_t recv_size = min(req->content_len, sizeof(content));
 
@@ -48,15 +50,15 @@ esp_err_t post_handler(httpd_req_t *req)
     if(cJSON_IsString(where) && (where->valuestring != NULL)) {
 
         if(strcmp(where->valuestring, "LED") == 0) {
-            if (cJSON_IsNumber(value)) {
-                printf("Received value: %d\n", value->valueint);
-                printf("Received where: %s\n", where->valuestring);
-                if(value->valueint == 1) {
+            if (cJSON_IsString(value)) {
+                if(strcmp(value->valuestring, "1") == 0) {
                     turn_WIFI_led_ON();
+                    ledON();
                 }
-                if (value->valueint == 0)
+                if (strcmp(value->valuestring, "0") == 0)
                 {
                     turn_WIFI_led_OFF();
+                    ledOFF();
                 }
                 
             } else {
@@ -65,16 +67,21 @@ esp_err_t post_handler(httpd_req_t *req)
                 return ESP_FAIL;
             }
         }
+        else if (strcmp(where->valuestring, "SHUTTERS_TIME") == 0)
+        {
+           printf("\n|CZAS ROLET|\n");
+        }
+        printf("\n\nReceived value: %s\n", value->valuestring);
+        printf("Received where: %s\n", where->valuestring);
     }
-
-    
-
-    cJSON_Delete(json);
     
     const char resp[] = "ESP received value";
     char buffer[50];
-    sprintf(buffer,"%s: %d",resp,value->valueint);
+
+    sprintf(buffer,"%s: %s",resp,value->valuestring);
     httpd_resp_send(req, buffer, HTTPD_RESP_USE_STRLEN);
+
+    cJSON_Delete(json);
     return ESP_OK;
 }
 
