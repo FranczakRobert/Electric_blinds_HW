@@ -23,7 +23,6 @@ static esp_err_t hello_get_handler(httpd_req_t *req) {
 
 esp_err_t post_handler(httpd_req_t *req)
 {
-    prinData();
     char content[100];
     size_t recv_size = min(req->content_len, sizeof(content));
 
@@ -36,6 +35,9 @@ esp_err_t post_handler(httpd_req_t *req)
     }
 
     content[recv_size] = '\0';
+
+    const char resp[] = "ESP received value";
+    char buffer[50];
 
     // Parse JSON data
     cJSON *json = cJSON_Parse(content);
@@ -60,7 +62,8 @@ esp_err_t post_handler(httpd_req_t *req)
                     turn_WIFI_led_OFF();
                     ledOFF();
                 }
-                
+                sprintf(buffer,"%s: %s",resp,value->valuestring);
+                httpd_resp_send(req, buffer, HTTPD_RESP_USE_STRLEN);
             } else {
                 httpd_resp_send_500(req);
                 cJSON_Delete(json);
@@ -70,16 +73,23 @@ esp_err_t post_handler(httpd_req_t *req)
         else if (strcmp(where->valuestring, "SHUTTERS_TIME") == 0)
         {
            printf("\n|CZAS ROLET|\n");
+           sprintf(buffer,"%s: %s",resp,value->valuestring);
+           httpd_resp_send(req, buffer, HTTPD_RESP_USE_STRLEN);
+           setTimeForSchutters(value->valuestring);
         }
-        printf("\n\nReceived value: %s\n", value->valuestring);
-        printf("Received where: %s\n", where->valuestring);
-    }
-    
-    const char resp[] = "ESP received value";
-    char buffer[50];
+        else if(strcmp(where->valuestring, "GET_TIME") == 0) {
+            printf("\n|GET TIME|\n");
+            if(getTimeForShutters() != NULL) {
+                sprintf(buffer,"%s: %s",resp,getTimeForShutters());
+            }
+            else {
+                sprintf(buffer,"%s: %s",resp,"NO TIME SET");
+            }
 
-    sprintf(buffer,"%s: %s",resp,value->valuestring);
-    httpd_resp_send(req, buffer, HTTPD_RESP_USE_STRLEN);
+            httpd_resp_send(req, buffer, HTTPD_RESP_USE_STRLEN);
+        }
+        // prinData();
+    }
 
     cJSON_Delete(json);
     return ESP_OK;
