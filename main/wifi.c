@@ -18,8 +18,8 @@
 static int s_retry_num = 0;
 static const char *TAG = "WIFI";
 
-static void event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id,void *event_data){
-    if(event_id == WIFI_EVENT_STA_START){
+static void event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
+    if(event_id == WIFI_EVENT_STA_START) {
         printf("WIFI CONNECTING....\n");
     }
     else if (event_id == WIFI_EVENT_STA_CONNECTED) {
@@ -29,7 +29,7 @@ static void event_handler(void *event_handler_arg, esp_event_base_t event_base, 
     }
     else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
         printf("WiFi lost connection\n");
-    if(s_retry_num<5) {
+        if(s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY) {
             esp_wifi_connect();
             s_retry_num++;
             printf("Retrying to Connect...\n");
@@ -43,8 +43,7 @@ static void event_handler(void *event_handler_arg, esp_event_base_t event_base, 
     }
 }
 
-void wifi_init_sta(void)
-{
+void wifi_init_sta(void) {
     turn_WIFI_led_OFF();
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -52,26 +51,22 @@ void wifi_init_sta(void)
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-    
 
-    nvs_flash_init();
-    ESP_ERROR_CHECK(esp_netif_init()); //network interdace initialization
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    esp_netif_create_default_wifi_sta();
 
-    ESP_ERROR_CHECK(esp_event_loop_create_default()); //responsible for handling and dispatching events
-    esp_netif_create_default_wifi_sta(); //sets up wifi wifi_init_config struct with default values
-
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT(); //sets up wifi wifi_init_config struct with default values
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));//wifi initialised with dafault wifi_initiation
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT,
-                                                        ESP_EVENT_ANY_ID,
-                                                        &event_handler,
-                                                        NULL));
+                                               ESP_EVENT_ANY_ID,
+                                               &event_handler,
+                                               NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT,
-                                                        IP_EVENT_STA_GOT_IP,
-                                                        &event_handler,
-                                                        NULL));
-
+                                               IP_EVENT_STA_GOT_IP,
+                                               &event_handler,
+                                               NULL));
 
     wifi_config_t wifi_config = {
         .sta = {
@@ -79,13 +74,13 @@ void wifi_init_sta(void)
             .password = PSSWD,
             .threshold.authmode = WIFI_AUTH_WPA2_PSK
         },
-    };                                                   
+    };
 
-    printf("Name : %s \n",NAME);
-    printf("Psswd: %s \n",PSSWD);
+    printf("Name : %s \n", NAME);
+    printf("Psswd: %s \n", PSSWD);
 
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA)); // Set Wi-Fi mode before setting configuration
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
-    esp_wifi_connect();
+    ESP_ERROR_CHECK(esp_wifi_connect());
 }

@@ -10,6 +10,7 @@
 #include "shutters_Data.h"
 
 #include "server.h"
+#include "nvm.h"
 
 #ifndef min
 #define min(a,b) (((a) < (b)) ? (a) : (b))
@@ -24,6 +25,8 @@ static esp_err_t hello_get_handler(httpd_req_t *req) {
 esp_err_t post_handler(httpd_req_t *req)
 {
     char content[100];
+    const char resp[] = "ESP received value";
+    char buffer[100];
     size_t recv_size = min(req->content_len, sizeof(content));
 
     int ret = httpd_req_recv(req, content, recv_size);
@@ -36,8 +39,7 @@ esp_err_t post_handler(httpd_req_t *req)
 
     content[recv_size] = '\0';
 
-    const char resp[] = "ESP received value";
-    char buffer[50];
+
 
     // Parse JSON data
     cJSON *json = cJSON_Parse(content);
@@ -72,15 +74,18 @@ esp_err_t post_handler(httpd_req_t *req)
         }
         else if (strcmp(where->valuestring, "SHUTTERS_TIME") == 0)
         {
-           printf("\n|CZAS ROLET|\n");
+           printf("\n|Shutters timer|\n");
            sprintf(buffer,"%s: %s",resp,value->valuestring);
            httpd_resp_send(req, buffer, HTTPD_RESP_USE_STRLEN);
-           setTimeForSchutters(value->valuestring);
+           saveStringToNVS("timestorage","key",value->valuestring);
         }
         else if(strcmp(where->valuestring, "GET_TIME") == 0) {
             printf("\n|GET TIME|\n");
-            if(getTimeForShutters() != NULL) {
-                sprintf(buffer,"%s: %s",resp,getTimeForShutters());
+            char NVM_buffer[64];  
+            esp_err_t error = readStringFromNVS("timestorage","key",NVM_buffer,sizeof(NVM_buffer));
+
+            if(error == ESP_OK) {
+                sprintf(buffer,"%s: %s",resp,NVM_buffer);
             }
             else {
                 sprintf(buffer,"%s: %s",resp,"NO TIME SET");
