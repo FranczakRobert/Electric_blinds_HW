@@ -40,7 +40,7 @@ esp_err_t readStringFromNVS(const char* namespace, const char* key, char* buffer
     err = nvs_get_str(nvsHandle, key, buffer, &bufferSize);
     switch (err) {
         case ESP_OK:
-            printf("Value read from NVS: %s\n", buffer);
+            printf("Raise-Down shutters time : %s\n", buffer);
             break;
         case ESP_ERR_NVS_NOT_FOUND:
             printf("Value not found in NVS!\n");

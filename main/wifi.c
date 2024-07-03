@@ -77,9 +77,8 @@ void wifi_init_sta(void) {
     };
 
     printf("Name : %s \n", NAME);
-    printf("Psswd: %s \n", PSSWD);
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA)); // Set Wi-Fi mode before setting configuration
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_ERROR_CHECK(esp_wifi_connect());
