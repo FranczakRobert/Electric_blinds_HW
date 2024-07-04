@@ -30,11 +30,6 @@ esp_err_t post_handler(httpd_req_t *req) {
     content[recv_size] = '\0';
     esp_err_t err = readJSON(content, buffer);
 
-    // // Set CORS headers
-    // httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    // httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-    // httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "Content-Type");
-
     if (err != ESP_OK) {
         httpd_resp_send_500(req);
     } else {

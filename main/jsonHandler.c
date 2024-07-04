@@ -5,6 +5,8 @@
 #include "shutters_Data.h"
 #include "JSON_VAL.h"
 #include "nvm.h"
+#include "stepper.h"
+#include <pthread.h>
 
 #include <stdio.h>
 
@@ -64,15 +66,17 @@ esp_err_t readJSON(char* content, char* buffer) {
         else if (strcmp(where->valuestring, "SHUTTERS_CONTROL") == 0) {
             if(strcmp(value->valuestring, "-1") == 0) {
                 printf("ARROW DOWN \n");
+                set_motor_mode(-1);
             }
             if(strcmp(value->valuestring, "1") == 0) {
                 printf("ARROW UP \n");
+                set_motor_mode(1);
             }
             if(strcmp(value->valuestring, "0") == 0) {
                 printf("ARROW STOP \n");
+                set_motor_mode(0);
             }
         }
-        
 
         return ESP_OK;
         cJSON_Delete(json);
