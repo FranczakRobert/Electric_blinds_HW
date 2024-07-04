@@ -13,7 +13,7 @@ esp_err_t readJSON(char* content, char* buffer) {
 
     cJSON *json = cJSON_Parse(content);
     if (json == NULL) {
-        // printf("json IS NULL...\n");
+        printf("json IS NULL...\n");
         return ESP_FAIL;
     }
     
@@ -61,6 +61,19 @@ esp_err_t readJSON(char* content, char* buffer) {
             }
             return ESP_OK;
         }
+        else if (strcmp(where->valuestring, "SHUTTERS_CONTROL") == 0) {
+            if(strcmp(value->valuestring, "-1") == 0) {
+                printf("ARROW DOWN \n");
+            }
+            if(strcmp(value->valuestring, "1") == 0) {
+                printf("ARROW UP \n");
+            }
+            if(strcmp(value->valuestring, "0") == 0) {
+                printf("ARROW STOP \n");
+            }
+        }
+        
+
         return ESP_OK;
         cJSON_Delete(json);
     }

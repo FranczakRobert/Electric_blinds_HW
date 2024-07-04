@@ -14,8 +14,7 @@
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
-esp_err_t post_handler(httpd_req_t *req)
-{
+esp_err_t post_handler(httpd_req_t *req) {
     char content[100];
     char buffer[100];
     size_t recv_size = min(req->content_len, sizeof(content));
@@ -29,15 +28,28 @@ esp_err_t post_handler(httpd_req_t *req)
     }
 
     content[recv_size] = '\0';
-    esp_err_t err = readJSON(content,&buffer);
+    esp_err_t err = readJSON(content, buffer);
 
-    if(err != ESP_OK) {
+    // // Set CORS headers
+    // httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    // httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+    // httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "Content-Type");
+
+    if (err != ESP_OK) {
         httpd_resp_send_500(req);
-    }
-    else {
+    } else {
         httpd_resp_send(req, buffer, HTTPD_RESP_USE_STRLEN);
     }
-    
+
+    return ESP_OK;
+}
+
+esp_err_t options_handler(httpd_req_t *req) {
+    // Set CORS headers for preflight response
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "Content-Type");
+    httpd_resp_send(req, NULL, 0);
     return ESP_OK;
 }
 
@@ -46,8 +58,7 @@ void start_http_server(void) {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
     if (httpd_start(&server, &config) == ESP_OK) {
-        httpd_register_uri_handler(server, &post);
+        httpd_register_uri_handler(server, &post_uri);
+        httpd_register_uri_handler(server, &options_uri);
     }
 }
-
-
